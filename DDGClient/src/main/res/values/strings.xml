@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">DDGClient</string>
+    <string name="buttonSearchCaption">Search!</string>
+    <string name="queryStringCaption">Query String sent to Duckduckgo</string>
+    <string name="queryStringResult">queryString</string>
+    <string name="definitionCaption">Definition:</string>
+    <string name="definitionResult">Definition</string>
+    <string name="definitionURLCaption">Definition Source URL:</string>
+    <string name="definitionURLResult">DefinitionURL</string>
+    <string name="wordSearchCaption">Word to define:</string>
+</resources>
