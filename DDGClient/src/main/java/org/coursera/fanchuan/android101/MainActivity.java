@@ -1,8 +1,8 @@
 package org.coursera.fanchuan.android101;
 
 import android.os.AsyncTask;
-import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
@@ -21,9 +21,12 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 
 public class MainActivity extends ActionBarActivity {
 
+    //Per Duckduckgo public API, includes &t parameter sending name of my app
     final String queryTemplate = "http://api.duckduckgo.com/?q=define+%s&format=json&t=DDGClient&pretty=0";
 
     @Override
@@ -34,13 +37,22 @@ public class MainActivity extends ActionBarActivity {
 
     public void onClickRunQuery(View vw) {
         EditText editSearch = (EditText) findViewById(R.id.editTextSearchWord);
-        String searchWord = (String) editSearch.getText().toString();
-        if (!searchWord.isEmpty()) {
-            String queryString = String.format(queryTemplate,searchWord);
-            TextView txt = (TextView) findViewById(R.id.textViewQuery);
-            txt.setText(queryString);
-            new runAsyncQuery().execute(queryString);
+        try {
+            String searchWord = editSearch.getText().toString();
+            //must encode spaces and other URL unsafe characters
+            searchWord = URLEncoder.encode(searchWord, "UTF-8");
+            if (!searchWord.isEmpty()) {
+                String queryString = String.format(queryTemplate, searchWord);
+                TextView txt = (TextView) findViewById(R.id.textViewQuery);
+                txt.setText(queryString);
+                new runAsyncQuery().execute(queryString);
+            }
+        } catch (NullPointerException e) {
+            e.printStackTrace();
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
         }
+
     }
 
     private class runAsyncQuery extends AsyncTask<String, Void, String> {
@@ -75,6 +87,11 @@ public class MainActivity extends ActionBarActivity {
         }
 
         private String getJsonRestAPI(String queryString) {
+            /*
+            queryString: the entire URL for the search, with http://
+            Use URLEncoder.encode(parameter, "UTF-8") on parameters before passing; we don't want spaces
+            in the URL
+            */
             StringBuilder builder = new StringBuilder();
             HttpClient client = new DefaultHttpClient();
             HttpGet httpGet = new HttpGet(queryString);
