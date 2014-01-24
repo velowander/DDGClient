@@ -5,9 +5,11 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
 import android.widget.TextView;
 
@@ -36,9 +38,20 @@ public class MainActivity extends ActionBarActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        EditText editSearch = (EditText) findViewById(R.id.editTextSearchWord);
+        editSearch.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                if (actionId == EditorInfo.IME_ACTION_SEARCH) {
+                    runQuery();
+                    return true;
+                }
+                return false;
+            }
+        });
     }
 
-    public void onClickRunQuery(View vw) {
+    public void runQuery() {
         EditText editSearch = (EditText) findViewById(R.id.editTextSearchWord);
         try {
             String searchWord = editSearch.getText().toString();
@@ -55,7 +68,10 @@ public class MainActivity extends ActionBarActivity {
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         }
+    }
 
+    public void onClickRunQuery(View vw) {
+        runQuery();
     }
 
     @Override
@@ -79,7 +95,13 @@ public class MainActivity extends ActionBarActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    private class runAsyncQuery extends AsyncTask<String, Void, String> {
+    public void showHelp() {
+        Dialog help = new Dialog(this);
+        help.setContentView(R.layout.dialog_help);
+        help.show();
+    }
+
+    protected class runAsyncQuery extends AsyncTask<String, Void, String> {
 
         @Override
         protected String doInBackground(String... params) {
@@ -146,12 +168,6 @@ public class MainActivity extends ActionBarActivity {
                     .commit();
         }
         */
-    }
-
-    public void showHelp() {
-        Dialog help = new Dialog(this);
-        help.setContentView(R.layout.dialog_help);
-        help.show();
     }
 
     /**

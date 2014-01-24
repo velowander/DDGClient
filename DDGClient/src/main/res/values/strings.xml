@@ -7,6 +7,6 @@
     <string name="queryStringCaption"><b><u>Query String sent to Duckduckgo:</u></b></string>
     <string name="definitionCaption"><b><u>Definition:</u></b></string>
     <string name="definitionURLCaption"><b><u>Definition Source URL:</u></b></string>
-    <string name="wordSearchCaption"><b><u>Word to define:</u></b></string>
+    <string name="wordSearchHint"><b><u>Search word(s)</u></b></string>
     <string name="rawJsonCaption"><b><u>Raw Json:</u></b></string>
 </resources>
