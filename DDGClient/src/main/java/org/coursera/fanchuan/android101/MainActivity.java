@@ -27,7 +27,7 @@ import java.net.URLEncoder;
 public class MainActivity extends ActionBarActivity {
 
     //Per Duckduckgo public API, includes &t parameter sending name of my app
-    final String queryTemplate = "http://api.duckduckgo.com/?q=define+%s&format=json&t=DDGClient&pretty=0";
+    final String queryTemplate = "http://api.duckduckgo.com/?q=define+%s&format=json&t=DDGClient&pretty=1";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,14 +62,13 @@ public class MainActivity extends ActionBarActivity {
             //No access to UI in this method, wait for onPostExecute()
             if (params.length >= 1) {
                 return getJsonRestAPI(params[0]);
-            }
-            else return null;
+            } else return null;
         }
 
         @Override
         protected void onPostExecute(String result) {
             //This method has access to the UI thread
-            Log.d("DDG REST API json",result);
+            Log.d("DDG REST API json", result);
             TextView txtResult = (TextView) findViewById(R.id.textViewRawJson);
             txtResult.setText(result);
             try {
@@ -80,8 +79,7 @@ public class MainActivity extends ActionBarActivity {
                 txtDefinition.setText(strDefinition);
                 TextView txtDefinitionURL = (TextView) findViewById(R.id.textViewDefinitionURL);
                 txtDefinitionURL.setText(strDefinitionURL);
-            }
-            catch (JSONException e) {
+            } catch (JSONException e) {
                 e.printStackTrace();
             }
         }
@@ -150,18 +148,17 @@ public class MainActivity extends ActionBarActivity {
 
     /**
      * A placeholder fragment containing a simple view.
-    public static class PlaceholderFragment extends Fragment {
+     public static class PlaceholderFragment extends Fragment {
 
-        public PlaceholderFragment() {
-        }
+     public PlaceholderFragment() {
+     }
 
-        @Override
-        public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                Bundle savedInstanceState) {
-            View rootView = inflater.inflate(R.layout.fragment_main, container, false);
-            return rootView;
-        }
-    }
-    */
+     @Override public View onCreateView(LayoutInflater inflater, ViewGroup container,
+     Bundle savedInstanceState) {
+     View rootView = inflater.inflate(R.layout.fragment_main, container, false);
+     return rootView;
+     }
+     }
+     */
 
 }
