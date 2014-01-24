@@ -32,10 +32,10 @@
         android:paddingBottom="8dp"/>
     <TextView
         android:layout_width="match_parent"
-        android:layout_height="0dp"
+        android:layout_height="wrap_content"
         android:layout_marginBottom="8dp"
-        android:text="@string/queryStringCaption"
-        android:layout_weight="0.5" />
+        android:text="@string/queryStringCaption" />
+
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="0dp"
@@ -45,34 +45,49 @@
         android:paddingBottom="8dp"/>
     <TextView
         android:layout_width="match_parent"
-        android:layout_height="0dp"
+        android:layout_height="wrap_content"
         android:layout_marginBottom="8dp"
-        android:text="@string/definitionCaption"
-        android:layout_weight="0.5" />
-    <TextView
+        android:text="@string/definitionCaption" />
+
+    <ScrollView
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:text="@string/definitionResult"
-        android:id="@+id/textViewDefinition"
-        android:layout_weight="1"/>
+        android:layout_weight="1">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:text="@string/definitionResult"
+            android:id="@+id/textViewDefinition" />
+    </ScrollView>
+
     <TextView
         android:layout_width="match_parent"
-        android:layout_height="0dp"
+        android:layout_height="wrap_content"
         android:layout_marginBottom="8dp"
-        android:text="@string/definitionURLCaption"
-        android:layout_weight="0.5" />
+        android:text="@string/definitionURLCaption" />
+
     <TextView
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:text="@string/definitionURLResult"
         android:id="@+id/textViewDefinitionURL"
         android:layout_weight="1"/>
-
     <TextView
         android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/rawJsonCaption" />
+
+    <ScrollView
+        android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:text="Result"
-        android:id="@+id/textViewResult"
-        android:layout_weight="5"/>
+        android:layout_weight="2">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:text="--"
+            android:id="@+id/textViewRawJson" />
+    </ScrollView>
 
 </LinearLayout>

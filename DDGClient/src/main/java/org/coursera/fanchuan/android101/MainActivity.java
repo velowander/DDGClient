@@ -70,7 +70,7 @@ public class MainActivity extends ActionBarActivity {
         protected void onPostExecute(String result) {
             //This method has access to the UI thread
             Log.d("DDG REST API json",result);
-            TextView txtResult = (TextView) findViewById(R.id.textViewResult);
+            TextView txtResult = (TextView) findViewById(R.id.textViewRawJson);
             txtResult.setText(result);
             try {
                 JSONObject queryJSON = new JSONObject(result);
