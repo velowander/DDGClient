@@ -5,6 +5,7 @@
     <string name="helpButton">Help</string>
     <string name="help_text">This app queries the <b>Duckduckgo</b> public internet API to look up word definitions.\n\nTo get started, enter a search term (one or more than one word, spaces OK) in the box. If you use multiple words, they should be commonly found together for good results (e.g. \"police officer\");  press the button.\nThe app starts an asynchronous task (does not "freeze" during processing), submits a <i>REST API</i> request over HTTP, receives the json response, and parses the response using <i>org.json.JSONObject</i>.\n\nThe raw json is provided for educational purposes.\n\nThank you <b>Duckduckgo</b> for providing a public API.\n\n<i>Icon: Wikimedia Commons</i></string>
     <string name="queryStringCaption"><b><u>Query String sent to Duckduckgo:</u></b></string>
+    <string name="queryStartedToast">Query sent to remote server, please wait</string>
     <string name="definitionCaption"><b><u>Definition:</u></b></string>
     <string name="definitionURLCaption"><b><u>Definition Source URL:</u></b></string>
     <string name="wordSearchHint"><b><u>Search word(s)</u></b></string>
