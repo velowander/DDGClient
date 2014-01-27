@@ -34,7 +34,7 @@ import java.net.URLEncoder;
 public class MainActivity extends ActionBarActivity {
 
     //Per Duckduckgo public API, includes &t parameter sending name of my app
-    final String queryTemplate = "http://api.duckduckgo.com/?q=define+%s&format=json&t=DDGClient&pretty=1";
+    final String queryTemplate = "http://api.duckduckgo.com/?q=define+%s&format=json&t=%s&pretty=1";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,7 +54,10 @@ public class MainActivity extends ActionBarActivity {
     }
 
     public void runQuery() {
+        /* Builds the query string, encoding the user's search word(s) and the app name, actual passing
+        of the query to the remote server is done in the AsyncTask */
         EditText editSearch = (EditText) findViewById(R.id.editTextSearchWord);
+        //show the user a "toast" (on screen notification) that query has started
         CharSequence text = getText(R.string.queryStartedToast);
         Toast toast = Toast.makeText(this, text, Toast.LENGTH_SHORT);
         toast.setGravity(Gravity.CENTER, 0, 0);
@@ -62,9 +65,11 @@ public class MainActivity extends ActionBarActivity {
         try {
             String searchWord = editSearch.getText().toString();
             //must encode spaces and other URL unsafe characters
-            searchWord = URLEncoder.encode(searchWord, "UTF-8");
+            final String encodingType = "UTF-8";
+            searchWord = URLEncoder.encode(searchWord, encodingType);
+            CharSequence appName = URLEncoder.encode(getText(R.string.app_name).toString(), encodingType);
             if (!searchWord.isEmpty()) {
-                String queryString = String.format(queryTemplate, searchWord);
+                String queryString = String.format(queryTemplate, searchWord, appName);
                 TextView txt = (TextView) findViewById(R.id.textViewQuery);
                 txt.setText(queryString);
                 new runAsyncQuery().execute(queryString);
