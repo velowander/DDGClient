@@ -3,19 +3,9 @@ package org.coursera.fanchuan.android101;
 import android.os.AsyncTask;
 import android.util.Log;
 
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.StatusLine;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.DefaultHttpClient;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 
@@ -60,7 +50,7 @@ class DDGQuery {
             //No access to UI in this method, wait for onPostExecute()
             Log.d(TAG, "starting AsyncQuery.doInBackground()");
             if (params.length >= 1) {
-                return getJsonRestAPI(params[0]);
+                return HttpGetHelper.execute(params[0]);
             } else return null;
         }
 
@@ -78,36 +68,6 @@ class DDGQuery {
             } catch (JSONException e) {
                 e.printStackTrace();
             }
-        }
-
-        private String getJsonRestAPI(String queryString) {
-            /*
-            queryString: the entire URL for the search, with http://
-            Use URLEncoder.encode(parameter, "UTF-8") on parameters before passing; we don't want spaces
-            in the URL
-            */
-            StringBuilder builder = new StringBuilder();
-            HttpClient client = new DefaultHttpClient();
-            HttpGet httpGet = new HttpGet(queryString);
-            try {
-                HttpResponse response = client.execute(httpGet);
-                StatusLine statusLine = response.getStatusLine();
-                int statusCode = statusLine.getStatusCode();
-                if (statusCode == 200) {
-                    HttpEntity entity = response.getEntity();
-                    InputStream content = entity.getContent();
-                    BufferedReader reader = new BufferedReader(new InputStreamReader(content));
-                    String line;
-                    while ((line = reader.readLine()) != null) {
-                        builder.append(line);
-                    }
-                } else {
-                    Log.e(Integer.toString(statusCode), "HTTP Response Code: " + Integer.toString(statusCode));
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            return builder.toString();
         }
     }
 }
