@@ -3,6 +3,7 @@ package org.coursera.fanchuan.android101;
 import android.app.Dialog;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
+import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -19,14 +20,11 @@ public class MainActivity extends ActionBarActivity implements DDGQueryObserver 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         final EditText editSearch = (EditText) findViewById(R.id.editTextSearchWord);
-        final String searchWord = editSearch.getText().toString();
-        final DDGQueryObserver observer = this; //need observer reference inside listener
         editSearch.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
                 if (actionId == EditorInfo.IME_ACTION_SEARCH) {
-                    showToastQueryStarted();
-                    new DDGQuery(observer).execute(searchWord);
+                    startQuery();
                     return true;
                 }
                 return false;
@@ -36,10 +34,7 @@ public class MainActivity extends ActionBarActivity implements DDGQueryObserver 
 
     @SuppressWarnings("unused")
     public void onClickRunQuery(View vw) {
-        final EditText editSearch = (EditText) findViewById(R.id.editTextSearchWord);
-        final String searchWord = editSearch.getText().toString();
-        showToastQueryStarted();
-        new DDGQuery(this).execute(searchWord);
+        startQuery();
     }
 
     @Override
@@ -65,9 +60,16 @@ public class MainActivity extends ActionBarActivity implements DDGQueryObserver 
         return super.onOptionsItemSelected(item);
     }
 
-    protected void showToastQueryStarted() {
+    protected void startQuery() {
+        //Get the word to search (send to DDGQuery)
+        final EditText editSearch = (EditText) findViewById(R.id.editTextSearchWord);
+        final String searchWord = editSearch.getText().toString();
+        //Show status update Toast to user
         CharSequence textToast = getText(R.string.queryStartedToast);
-        Toast.makeText(this, textToast, Toast.LENGTH_SHORT).show();
+        Toast toast = Toast.makeText(this, textToast, Toast.LENGTH_SHORT);
+        toast.setGravity(Gravity.CENTER, 0, 0);
+        toast.show();
+        new DDGQuery(this).execute(searchWord);
     }
 
     //methods from DDGQueryObserver interface:

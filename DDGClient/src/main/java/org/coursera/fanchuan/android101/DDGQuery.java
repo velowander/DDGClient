@@ -68,18 +68,12 @@ class DDGQuery {
         protected void onPostExecute(String result) {
             //This method has access to the UI thread
             Log.d("DDG REST API json", result);
-            //TextView txtResult = (TextView) findViewById(R.id.textViewRawJson);
-            //txtResult.setText(result);
             observer.updateRawJson(result);
             try {
                 JSONObject queryJSON = new JSONObject(result);
                 String strDefinition = (String) queryJSON.get("Definition");
                 String strDefinitionURL = (String) queryJSON.get("DefinitionURL");
-                //TextView txtDefinition = (TextView) findViewById(R.id.textViewDefinition);
-                //txtDefinition.setText(strDefinition);
                 observer.updateDefinition(strDefinition);
-                //TextView txtDefinitionURL = (TextView) findViewById(R.id.textViewDefinitionURL);
-                //txtDefinitionURL.setText(strDefinitionURL);
                 observer.updateDefinitionURL(strDefinitionURL);
             } catch (JSONException e) {
                 e.printStackTrace();
