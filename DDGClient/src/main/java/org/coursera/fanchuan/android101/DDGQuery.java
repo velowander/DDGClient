@@ -11,6 +11,11 @@ import java.net.URLEncoder;
 
 class DDGQuery {
 
+    /* Wrapper class for AsyncQuery; needed because the AsyncTask onPreExecute() method does not have
+    access to the search parameters and I wanted to update the queryString on the UI BEFORE the submitting
+    the asynchronous network request (better user experience).
+     */
+
     private DDGQueryObserver observer;
     private String TAG = DDGQuery.class.getSimpleName();
 
@@ -23,7 +28,6 @@ class DDGQuery {
         of the query to the remote server is done in the AsyncTask */
         //Per Duckduckgo public API, includes &t parameter sending name of my app
         final String queryTemplate = "http://api.duckduckgo.com/?q=define+%s&format=json&t=%s&pretty=1";
-        //show the user a "toast" (on screen notification) that query has started
         try {
             //must encode spaces and other URL unsafe characters
             final String encodingType = "UTF-8";
@@ -32,22 +36,27 @@ class DDGQuery {
             if (!searchWord.isEmpty()) {
                 String queryString = String.format(queryTemplate, searchWord, appName);
                 observer.updateQueryString(queryString);
-                //TextView txt = (TextView) findViewById(R.id.textViewQuery);
-                //txt.setText(queryString);
-                new AsyncQuery().execute(queryString);
+                new AsyncQuery(observer).execute(queryString);
             }
         } catch (NullPointerException e) {
-            e.printStackTrace();
+            Log.e(TAG, "execute: NullPointerException", e);
         } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
+            Log.e(TAG, "execute: UnsupportedEncodingException");
         }
     }
 
-    protected class AsyncQuery extends AsyncTask<String, Void, String> {
+    protected static class AsyncQuery extends AsyncTask<String, Void, String> {
+
+        private DDGQueryObserver observer;
+        private String TAG = AsyncQuery.class.getSimpleName();
+
+        public AsyncQuery(DDGQueryObserver observer) {
+            this.observer = observer;
+        }
 
         @Override
         protected String doInBackground(String... params) {
-            //No access to UI in this method, wait for onPostExecute()
+            //No access to UI or Activity callback interface in this method, wait for onPostExecute()
             Log.d(TAG, "starting AsyncQuery.doInBackground()");
             if (params.length >= 1) {
                 return HttpGetHelper.execute(params[0]);
@@ -57,7 +66,7 @@ class DDGQuery {
         @Override
         protected void onPostExecute(String result) {
             //This method has access to the UI thread
-            Log.d("DDG REST API json", result);
+            Log.i(TAG, "DDG REST API json" + result);
             observer.updateRawJson(result);
             try {
                 JSONObject queryJSON = new JSONObject(result);
@@ -66,7 +75,7 @@ class DDGQuery {
                 observer.updateDefinition(strDefinition);
                 observer.updateDefinitionURL(strDefinitionURL);
             } catch (JSONException e) {
-                e.printStackTrace();
+                Log.e(TAG, "Unable to parse json / update definitions", e);
             }
         }
     }
