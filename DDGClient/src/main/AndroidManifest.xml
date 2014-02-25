@@ -1,6 +1,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="org.coursera.fanchuan.android101">
 
+    <!-- See build.gradle for uses-sdk information -->
+    <uses-permission android:name="android.permission.INTERNET" />
     <application android:allowBackup="true"
         android:label="@string/app_name"
         android:icon="@drawable/ic_launcher"
@@ -15,12 +17,5 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
     </application>
-    <uses-sdk
-        android:minSdkVersion="10"
-        android:targetSdkVersion="19" />
-
-    <uses-permission android:name="android.permission.INTERNET" />
-
 </manifest>
