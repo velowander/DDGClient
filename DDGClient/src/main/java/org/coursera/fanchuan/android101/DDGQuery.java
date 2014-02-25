@@ -1,6 +1,7 @@
 package org.coursera.fanchuan.android101;
 
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Log;
 
@@ -18,16 +19,16 @@ class DDGQuery {
 
     private String TAG = DDGQuery.class.getSimpleName();
     private DDGQueryObserver observer;
-    private ProgressDialog progressDialog;
+    private Context context;
 
-    DDGQuery(DDGQueryObserver observer) {
+    DDGQuery(final DDGQueryObserver observer) {
         this.observer = observer;
     }
 
-    public DDGQuery(DDGQueryObserver observer, ProgressDialog progressDialog) {
+    public DDGQuery(final DDGQueryObserver observer, final Context context) {
         //Will use the (optionally) supplied ProgressDialog and close it afterwards
         this.observer = observer;
-        this.progressDialog = progressDialog;
+        this.context = context;
     }
 
 
@@ -44,28 +45,40 @@ class DDGQuery {
             if (!searchWord.isEmpty()) {
                 String queryString = String.format(queryTemplate, searchWord, appName);
                 observer.updateQueryString(queryString);
-                new AsyncQuery(observer).execute(queryString);
+                new AsyncQuery(observer, context).execute(queryString);
             }
         } catch (Exception e) {
-            Log.e(TAG, "execute: failed due to Exception", e);
-            if (progressDialog != null) {
-                progressDialog.setMessage("Unable to retrieve query results");
-            }
-        } finally {
-            if (progressDialog != null) {
-                progressDialog.dismiss();
-            }
+            Log.e(TAG, "DDGQuery wrapper class execute: failed due to Exception", e);
         }
-
     }
 
     protected static class AsyncQuery extends AsyncTask<String, Void, String> {
 
         private final String TAG = AsyncQuery.class.getSimpleName();
         private DDGQueryObserver observer;
+        private Context context;
+        private ProgressDialog progressDialog;
 
-        public AsyncQuery(DDGQueryObserver observer) {
+        public AsyncQuery(final DDGQueryObserver observer) {
             this.observer = observer;
+        }
+
+        public AsyncQuery(final DDGQueryObserver observer, final Context context) {
+            this.observer = observer;
+            this.context = context;
+        }
+
+        @Override
+        protected void onPreExecute() {
+            //Setup a "please wait" dialog if context is available
+            if (context != null) {
+                progressDialog = new ProgressDialog(context);
+                progressDialog.setCancelable(true);
+                progressDialog.setIndeterminate(true);
+                progressDialog.setTitle(context.getText(R.string.queryStartedDialogTitle));
+                progressDialog.setMessage(context.getText(R.string.queryStartedDialogText));
+                progressDialog.show();
+            }
         }
 
         @Override
@@ -90,12 +103,14 @@ class DDGQuery {
                 observer.updateDefinitionURL(strDefinitionURL);
             } catch (JSONException e) {
                 Log.e(TAG, "Unable to parse json / update definitions", e);
-
+            } finally {
+                if (progressDialog != null) {
+                    progressDialog.dismiss();
+                }
             }
         }
     }
 }
-
 
 interface DDGQueryObserver {
     //Callback methods to give the activity information to update the UI.

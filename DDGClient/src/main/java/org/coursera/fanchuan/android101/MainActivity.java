@@ -1,7 +1,6 @@
 package org.coursera.fanchuan.android101;
 
 import android.app.Dialog;
-import android.app.ProgressDialog;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.view.KeyEvent;
@@ -63,18 +62,8 @@ public class MainActivity extends ActionBarActivity implements DDGQueryObserver 
         //Get the word to search (send to DDGQuery)
         final EditText editSearch = (EditText) findViewById(R.id.editTextSearchWord);
         final String searchWord = editSearch.getText().toString();
-        //Show status update Toast to user
-        //Toast toast = Toast.makeText(this, getText(R.string.queryStartedDialogText), Toast.LENGTH_SHORT);
-        //toast.setGravity(Gravity.CENTER, 0, 0);
-        //toast.show();
-        ProgressDialog pd = new ProgressDialog(this);
-        pd.setCancelable(true);
-        pd.setIndeterminate(true);
-        pd.setTitle(getText(R.string.queryStartedDialogTitle));
-        pd.setMessage(getText(R.string.queryStartedDialogText));
-        pd.show();
         //ProgressDialog.show(this, getText(R.string.queryStartedDialogTitle), getText(R.string.queryStartedDialogText), true, true);
-        new DDGQuery(this, pd).execute(searchWord);
+        new DDGQuery(this, this).execute(searchWord);
     }
 
     //methods from DDGQueryObserver interface:
