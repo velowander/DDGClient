@@ -1,9 +1,9 @@
 package org.coursera.fanchuan.android101;
 
 import android.app.Dialog;
+import android.app.ProgressDialog;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
-import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -11,7 +11,6 @@ import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
 import android.widget.TextView;
-import android.widget.Toast;
 
 public class MainActivity extends ActionBarActivity implements DDGQueryObserver {
 
@@ -65,11 +64,17 @@ public class MainActivity extends ActionBarActivity implements DDGQueryObserver 
         final EditText editSearch = (EditText) findViewById(R.id.editTextSearchWord);
         final String searchWord = editSearch.getText().toString();
         //Show status update Toast to user
-        CharSequence textToast = getText(R.string.queryStartedToast);
-        Toast toast = Toast.makeText(this, textToast, Toast.LENGTH_SHORT);
-        toast.setGravity(Gravity.CENTER, 0, 0);
-        toast.show();
-        new DDGQuery(this).execute(searchWord);
+        //Toast toast = Toast.makeText(this, getText(R.string.queryStartedDialogText), Toast.LENGTH_SHORT);
+        //toast.setGravity(Gravity.CENTER, 0, 0);
+        //toast.show();
+        ProgressDialog pd = new ProgressDialog(this);
+        pd.setCancelable(true);
+        pd.setIndeterminate(true);
+        pd.setTitle(getText(R.string.queryStartedDialogTitle));
+        pd.setMessage(getText(R.string.queryStartedDialogText));
+        pd.show();
+        //ProgressDialog.show(this, getText(R.string.queryStartedDialogTitle), getText(R.string.queryStartedDialogText), true, true);
+        new DDGQuery(this, pd).execute(searchWord);
     }
 
     //methods from DDGQueryObserver interface:
@@ -92,27 +97,4 @@ public class MainActivity extends ActionBarActivity implements DDGQueryObserver 
         TextView textView = (TextView) findViewById(R.id.textViewQuery);
         textView.setText(queryString);
     }
-    /*
-        if (savedInstanceState == null) {
-            getSupportFragmentManager().beginTransaction()
-                    .add(R.id.container, new PlaceholderFragment())
-                    .commit();
-        }
-        */
-
-    /**
-     * A placeholder fragment containing a simple view.
-     public static class PlaceholderFragment extends Fragment {
-
-     public PlaceholderFragment() {
-     }
-
-     @Override public View onCreateView(LayoutInflater inflater, ViewGroup container,
-     Bundle savedInstanceState) {
-     View rootView = inflater.inflate(R.layout.fragment_main, container, false);
-     return rootView;
-     }
-     }
-     */
-
 }

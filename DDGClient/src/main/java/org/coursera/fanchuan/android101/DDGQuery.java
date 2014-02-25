@@ -1,12 +1,12 @@
 package org.coursera.fanchuan.android101;
 
+import android.app.ProgressDialog;
 import android.os.AsyncTask;
 import android.util.Log;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 
 class DDGQuery {
@@ -16,12 +16,20 @@ class DDGQuery {
     the asynchronous network request (better user experience).
      */
 
-    private DDGQueryObserver observer;
     private String TAG = DDGQuery.class.getSimpleName();
+    private DDGQueryObserver observer;
+    private ProgressDialog progressDialog;
 
     DDGQuery(DDGQueryObserver observer) {
         this.observer = observer;
     }
+
+    public DDGQuery(DDGQueryObserver observer, ProgressDialog progressDialog) {
+        //Will use the (optionally) supplied ProgressDialog and close it afterwards
+        this.observer = observer;
+        this.progressDialog = progressDialog;
+    }
+
 
     public void execute(String searchWord) {
         /* Builds the query string, encoding the user's search word(s) and the app name, actual passing
@@ -38,17 +46,23 @@ class DDGQuery {
                 observer.updateQueryString(queryString);
                 new AsyncQuery(observer).execute(queryString);
             }
-        } catch (NullPointerException e) {
-            Log.e(TAG, "execute: NullPointerException", e);
-        } catch (UnsupportedEncodingException e) {
-            Log.e(TAG, "execute: UnsupportedEncodingException");
+        } catch (Exception e) {
+            Log.e(TAG, "execute: failed due to Exception", e);
+            if (progressDialog != null) {
+                progressDialog.setMessage("Unable to retrieve query results");
+            }
+        } finally {
+            if (progressDialog != null) {
+                progressDialog.dismiss();
+            }
         }
+
     }
 
     protected static class AsyncQuery extends AsyncTask<String, Void, String> {
 
+        private final String TAG = AsyncQuery.class.getSimpleName();
         private DDGQueryObserver observer;
-        private String TAG = AsyncQuery.class.getSimpleName();
 
         public AsyncQuery(DDGQueryObserver observer) {
             this.observer = observer;
@@ -66,9 +80,9 @@ class DDGQuery {
         @Override
         protected void onPostExecute(String result) {
             //This method has access to the UI thread
-            Log.i(TAG, "DDG REST API json" + result);
-            observer.updateRawJson(result);
             try {
+                Log.i(TAG, "DDG REST API json" + result);
+                observer.updateRawJson(result);
                 JSONObject queryJSON = new JSONObject(result);
                 String strDefinition = (String) queryJSON.get("Definition");
                 String strDefinitionURL = (String) queryJSON.get("DefinitionURL");
@@ -76,10 +90,12 @@ class DDGQuery {
                 observer.updateDefinitionURL(strDefinitionURL);
             } catch (JSONException e) {
                 Log.e(TAG, "Unable to parse json / update definitions", e);
+
             }
         }
     }
 }
+
 
 interface DDGQueryObserver {
     //Callback methods to give the activity information to update the UI.
