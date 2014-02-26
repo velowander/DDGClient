@@ -16,6 +16,7 @@ import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
 import android.widget.TextView;
 
+@SuppressWarnings("deprecation")
 public class MainActivity extends ActionBarActivity implements DDGQueryObserver {
 
     private LocalBroadcastManager broadcastManager;
@@ -23,10 +24,10 @@ public class MainActivity extends ActionBarActivity implements DDGQueryObserver 
     public final BroadcastReceiver queryReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            updateDefinition(intent.getStringExtra(DDGQuery.updateDefinition));
-            updateDefinitionURL(intent.getStringExtra(DDGQuery.updateDefinitionURL));
-            updateRawJson(intent.getStringExtra(DDGQuery.updateRawJson));
-            updateQueryString(intent.getStringExtra(DDGQuery.updateQueryString));
+            updateDefinition(intent.getStringExtra(DDGAsyncQuery.updateDefinition));
+            updateDefinitionURL(intent.getStringExtra(DDGAsyncQuery.updateDefinitionURL));
+            updateRawJson(intent.getStringExtra(DDGAsyncQuery.updateRawJson));
+            updateQueryString(intent.getStringExtra(DDGAsyncQuery.updateQueryString));
         }
     };
 
@@ -88,11 +89,10 @@ public class MainActivity extends ActionBarActivity implements DDGQueryObserver 
     }
 
     protected void startQuery() {
-        //Get the word to search (send to DDGQuery)
+        //Get the word to search (send to DDGAsyncQuery)
         final EditText editSearch = (EditText) findViewById(R.id.editTextSearchWord);
         final String searchWord = editSearch.getText().toString();
-        //ProgressDialog.show(this, getText(R.string.queryStartedDialogTitle), getText(R.string.queryStartedDialogText), true, true);
-        new DDGQuery(this).execute(searchWord);
+        new DDGAsyncQuery(this).execute(searchWord);
     }
 
     //methods from DDGQueryObserver interface:

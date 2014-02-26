@@ -12,12 +12,15 @@ import org.json.JSONObject;
 
 import java.net.URLEncoder;
 
+@Deprecated
+@SuppressWarnings("unused")
 class DDGQuery {
 
-    /* Wrapper class for AsyncQuery; needed because the AsyncTask onPreExecute() method does not have
-    access to the search parameters and I wanted to update the queryString on the UI BEFORE the submitting
-    the asynchronous network request (better user experience).
-     */
+    /* Wrapper class for AsyncQuery, now deprecated and replaced by DDGAsyncQuery
+    * It is a hack - at the time of programming I didn't understand threads and interfaces, so I couldn't
+    * figure out display toasts or dialogs to the UI any other way, and I wanted to update the queryString
+    * on the UI BEFORE the submitting the asynchronous network request (better user experience).
+    */
 
     //Key strings for Intent containing query data
     final static String updateDefinition = "updateDefinition";
@@ -69,15 +72,22 @@ class DDGQuery {
         }
     }
 
+    @Deprecated
+    @SuppressWarnings("unused")
     protected static class AsyncQuery extends AsyncTask<String, Void, String> {
 
         private final String TAG = AsyncQuery.class.getSimpleName();
         private DDGQueryObserver observer;
         private Context context;
-        private ProgressDialog progressDialog;
+        private ProgressDialog dialog;
 
         public AsyncQuery(final Context context) {
             this.context = context;
+            dialog = new ProgressDialog(context);
+            dialog.setCancelable(true);
+            dialog.setIndeterminate(true);
+            dialog.setTitle(context.getText(R.string.queryStartedDialogTitle));
+            dialog.setMessage(context.getText(R.string.queryStartedDialogText));
         }
 
         @Deprecated
@@ -89,14 +99,7 @@ class DDGQuery {
         @Override
         protected void onPreExecute() {
             //Setup a "please wait" dialog if context is available
-            if (context != null) {
-                progressDialog = new ProgressDialog(context);
-                progressDialog.setCancelable(true);
-                progressDialog.setIndeterminate(true);
-                progressDialog.setTitle(context.getText(R.string.queryStartedDialogTitle));
-                progressDialog.setMessage(context.getText(R.string.queryStartedDialogText));
-                progressDialog.show();
-            }
+            if (dialog != null) dialog.show();
         }
 
         @Override
@@ -126,8 +129,8 @@ class DDGQuery {
             } catch (JSONException e) {
                 Log.e(TAG, "Unable to parse json / update definitions", e);
             } finally {
-                if (progressDialog != null) {
-                    progressDialog.dismiss();
+                if (dialog != null) {
+                    dialog.dismiss();
                 }
             }
             LocalBroadcastManager.getInstance(context).sendBroadcast(broadcastIntent);
@@ -136,18 +139,16 @@ class DDGQuery {
 }
 
 @Deprecated
+@SuppressWarnings("unused")
 interface DDGQueryObserver {
     /* Callback methods to give the activity information to update the UI.
-    * @Deprecated in favor of using Intents and LocalBroadcastManager */
-    @Deprecated
+    * @Deprecated in favor of using Intents and LocalBroadcastManager but still supported by DDGQuery which
+    * is also @Deprecated. DDGAsyncQuery does not at this writing support DDGObserver. */
     void updateDefinition(String definition);
 
-    @Deprecated
     void updateDefinitionURL(String definitionURL);
 
-    @Deprecated
     void updateRawJson(String rawJson);
 
-    @Deprecated
     void updateQueryString(String queryString);
 }
