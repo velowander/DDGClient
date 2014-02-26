@@ -10,7 +10,7 @@
         <activity
             android:name=".MainActivity"
             android:label="Define a word"
-            android:screenOrientation="portrait" >
+            android:screenOrientation="locked">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

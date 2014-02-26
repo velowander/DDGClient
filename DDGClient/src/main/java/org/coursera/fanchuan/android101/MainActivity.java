@@ -1,7 +1,12 @@
 package org.coursera.fanchuan.android101;
 
 import android.app.Dialog;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.ActionBarActivity;
 import android.view.KeyEvent;
 import android.view.Menu;
@@ -13,10 +18,22 @@ import android.widget.TextView;
 
 public class MainActivity extends ActionBarActivity implements DDGQueryObserver {
 
-    @Override
+    private LocalBroadcastManager broadcastManager;
+    public final static String JSON_RESULT_INTENT = "org.coursera.fanchuan.android101.jsonresult";
+    public final BroadcastReceiver queryReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            updateDefinition(intent.getStringExtra(DDGQuery.updateDefinition));
+            updateDefinitionURL(intent.getStringExtra(DDGQuery.updateDefinitionURL));
+            updateRawJson(intent.getStringExtra(DDGQuery.updateRawJson));
+            updateQueryString(intent.getStringExtra(DDGQuery.updateQueryString));
+        }
+    };
+
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        broadcastManager = LocalBroadcastManager.getInstance(this);
         final EditText editSearch = (EditText) findViewById(R.id.editTextSearchWord);
         editSearch.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
@@ -28,6 +45,18 @@ public class MainActivity extends ActionBarActivity implements DDGQueryObserver 
                 return false;
             }
         });
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        broadcastManager.unregisterReceiver(queryReceiver);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        broadcastManager.registerReceiver(queryReceiver, new IntentFilter(this.JSON_RESULT_INTENT));
     }
 
     @SuppressWarnings("unused")
@@ -63,27 +92,35 @@ public class MainActivity extends ActionBarActivity implements DDGQueryObserver 
         final EditText editSearch = (EditText) findViewById(R.id.editTextSearchWord);
         final String searchWord = editSearch.getText().toString();
         //ProgressDialog.show(this, getText(R.string.queryStartedDialogTitle), getText(R.string.queryStartedDialogText), true, true);
-        new DDGQuery(this, this).execute(searchWord);
+        new DDGQuery(this).execute(searchWord);
     }
 
     //methods from DDGQueryObserver interface:
     public void updateDefinition(String definition) {
-        TextView textView = (TextView) findViewById(R.id.textViewDefinition);
-        textView.setText(definition);
+        if (definition != null) {
+            TextView textView = (TextView) findViewById(R.id.textViewDefinition);
+            textView.setText(definition);
+        }
     }
 
     public void updateDefinitionURL(String definitionURL) {
-        TextView textView = (TextView) findViewById(R.id.textViewDefinitionURL);
-        textView.setText(definitionURL);
+        if (definitionURL != null) {
+            TextView textView = (TextView) findViewById(R.id.textViewDefinitionURL);
+            textView.setText(definitionURL);
+        }
     }
 
     public void updateRawJson(String rawJson) {
-        TextView textView = (TextView) findViewById(R.id.textViewRawJson);
-        textView.setText(rawJson);
+        if (rawJson != null) {
+            TextView textView = (TextView) findViewById(R.id.textViewRawJson);
+            textView.setText(rawJson);
+        }
     }
 
     public void updateQueryString(String queryString) {
-        TextView textView = (TextView) findViewById(R.id.textViewQuery);
-        textView.setText(queryString);
+        if (queryString != null) {
+            TextView textView = (TextView) findViewById(R.id.textViewQuery);
+            textView.setText(queryString);
+        }
     }
 }

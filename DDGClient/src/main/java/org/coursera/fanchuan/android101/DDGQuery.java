@@ -2,7 +2,9 @@ package org.coursera.fanchuan.android101;
 
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.Intent;
 import android.os.AsyncTask;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
 import org.json.JSONException;
@@ -17,18 +19,30 @@ class DDGQuery {
     the asynchronous network request (better user experience).
      */
 
+    //Key strings for Intent containing query data
+    final static String updateDefinition = "updateDefinition";
+    final static String updateDefinitionURL = "updateDefinitionURL";
+    final static String updateRawJson = "updateRawJson";
+    final static String updateQueryString = "updateQueryString";
+
+
     private String TAG = DDGQuery.class.getSimpleName();
     private DDGQueryObserver observer;
     private Context context;
+    private LocalBroadcastManager broadcastManager;
 
-    DDGQuery(final DDGQueryObserver observer) {
-        this.observer = observer;
+    public DDGQuery(final Context context) {
+        if (context == null)
+            throw new IllegalArgumentException("DDGQuery: Context may not be null");
+        broadcastManager = LocalBroadcastManager.getInstance(context);
+        this.context = context;
     }
 
-    public DDGQuery(final DDGQueryObserver observer, final Context context) {
+    @Deprecated
+    public DDGQuery(final Context context, final DDGQueryObserver observer) {
         //Will use the (optionally) supplied ProgressDialog and close it afterwards
+        this(context);
         this.observer = observer;
-        this.context = context;
     }
 
 
@@ -44,8 +58,11 @@ class DDGQuery {
             CharSequence appName = URLEncoder.encode(TAG, encodingType);
             if (!searchWord.isEmpty()) {
                 String queryString = String.format(queryTemplate, searchWord, appName);
-                observer.updateQueryString(queryString);
-                new AsyncQuery(observer, context).execute(queryString);
+                if (observer != null) observer.updateQueryString(queryString);
+                Log.i(TAG, "Sending broadcast");
+                broadcastManager.sendBroadcast(new Intent(MainActivity.JSON_RESULT_INTENT)
+                        .putExtra(updateQueryString, queryString));
+                new AsyncQuery(context).execute(queryString);
             }
         } catch (Exception e) {
             Log.e(TAG, "DDGQuery wrapper class execute: failed due to Exception", e);
@@ -59,13 +76,14 @@ class DDGQuery {
         private Context context;
         private ProgressDialog progressDialog;
 
-        public AsyncQuery(final DDGQueryObserver observer) {
-            this.observer = observer;
+        public AsyncQuery(final Context context) {
+            this.context = context;
         }
 
-        public AsyncQuery(final DDGQueryObserver observer, final Context context) {
+        @Deprecated
+        public AsyncQuery(final Context context, final DDGQueryObserver observer) {
+            this(context);
             this.observer = observer;
-            this.context = context;
         }
 
         @Override
@@ -93,14 +111,18 @@ class DDGQuery {
         @Override
         protected void onPostExecute(String result) {
             //This method has access to the UI thread
+            Intent broadcastIntent = new Intent(MainActivity.JSON_RESULT_INTENT);
             try {
                 Log.i(TAG, "DDG REST API json" + result);
-                observer.updateRawJson(result);
+                if (observer != null) observer.updateRawJson(result);
+                broadcastIntent.putExtra(DDGQuery.updateRawJson, result);
                 JSONObject queryJSON = new JSONObject(result);
                 String strDefinition = (String) queryJSON.get("Definition");
                 String strDefinitionURL = (String) queryJSON.get("DefinitionURL");
-                observer.updateDefinition(strDefinition);
-                observer.updateDefinitionURL(strDefinitionURL);
+                if (observer != null) observer.updateDefinition(strDefinition);
+                broadcastIntent.putExtra(DDGQuery.updateDefinition, strDefinition);
+                if (observer != null) observer.updateDefinitionURL(strDefinitionURL);
+                broadcastIntent.putExtra(DDGQuery.updateDefinitionURL, strDefinitionURL);
             } catch (JSONException e) {
                 Log.e(TAG, "Unable to parse json / update definitions", e);
             } finally {
@@ -108,17 +130,24 @@ class DDGQuery {
                     progressDialog.dismiss();
                 }
             }
+            LocalBroadcastManager.getInstance(context).sendBroadcast(broadcastIntent);
         }
     }
 }
 
+@Deprecated
 interface DDGQueryObserver {
-    //Callback methods to give the activity information to update the UI.
+    /* Callback methods to give the activity information to update the UI.
+    * @Deprecated in favor of using Intents and LocalBroadcastManager */
+    @Deprecated
     void updateDefinition(String definition);
 
+    @Deprecated
     void updateDefinitionURL(String definitionURL);
 
+    @Deprecated
     void updateRawJson(String rawJson);
 
+    @Deprecated
     void updateQueryString(String queryString);
 }
