@@ -60,11 +60,6 @@ public class MainActivity extends ActionBarActivity implements DDGQueryObserver 
         broadcastManager.registerReceiver(queryReceiver, new IntentFilter(this.JSON_RESULT_INTENT));
     }
 
-    @SuppressWarnings("unused")
-    public void onClickRunQuery(View vw) {
-        startQuery();
-    }
-
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
 
@@ -88,6 +83,11 @@ public class MainActivity extends ActionBarActivity implements DDGQueryObserver 
         return super.onOptionsItemSelected(item);
     }
 
+    @SuppressWarnings("unused")
+    public void onClickRunQuery(View vw) {
+        startQuery();
+    }
+
     protected void startQuery() {
         //Get the word to search (send to DDGAsyncQuery)
         final EditText editSearch = (EditText) findViewById(R.id.editTextSearchWord);
@@ -95,7 +95,7 @@ public class MainActivity extends ActionBarActivity implements DDGQueryObserver 
         new DDGAsyncQuery(this).execute(searchWord);
     }
 
-    //methods from DDGQueryObserver interface:
+    //methods from @Deprecated DDGQueryObserver interface, however they are in active use:
     public void updateDefinition(String definition) {
         if (definition != null) {
             TextView textView = (TextView) findViewById(R.id.textViewDefinition);
