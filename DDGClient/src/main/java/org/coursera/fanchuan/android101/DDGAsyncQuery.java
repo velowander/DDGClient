@@ -13,19 +13,22 @@ import org.json.JSONObject;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 
+@Deprecated
+@SuppressWarnings("unused")
 class DDGAsyncQuery extends AsyncTask<String, Void, String> {
     /* Replacement class for DDGQuery that avoids needing a "wrapper" around the AsyncTask
-    * DDGAsyncQuery no longer supports the @Deprecated DDGObserver interface */
+    * DDGAsyncQuery no longer supports the @Deprecated DDGObserver interface
+    * I designed DDGLoader to supercede this class though I am working on an issue (see forceLoad)*/
 
     private final String TAG = DDGAsyncQuery.class.getSimpleName();
     private LocalBroadcastManager broadcastManager;
     private ProgressDialog dialog;
 
     //Key strings for Intent containing query data
-    final static String updateDefinition = "updateDefinition";
-    final static String updateDefinitionURL = "updateDefinitionURL";
-    final static String updateRawJson = "updateRawJson";
-    final static String updateQueryString = "updateQueryString";
+    final static String updateDefinition = "UPDATE_DEFINITION";
+    final static String updateDefinitionURL = "UPDATE_DEFINITION_URL";
+    final static String updateRawJson = "UPDATE_RAW_JSON";
+    final static String updateQueryString = "UPDATE_QUERY_STRING";
 
     public DDGAsyncQuery(final Context context) {
         /* Supplying a non-null Context is strongly recommended

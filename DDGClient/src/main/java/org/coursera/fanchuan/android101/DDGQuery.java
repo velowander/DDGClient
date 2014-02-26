@@ -23,11 +23,10 @@ class DDGQuery {
     */
 
     //Key strings for Intent containing query data
-    final static String updateDefinition = "updateDefinition";
-    final static String updateDefinitionURL = "updateDefinitionURL";
-    final static String updateRawJson = "updateRawJson";
-    final static String updateQueryString = "updateQueryString";
-
+    final static String UPDATE_DEFINITION = "UPDATE_DEFINITION";
+    final static String UPDATE_DEFINITION_URL = "UPDATE_DEFINITION_URL";
+    final static String UPDATE_RAW_JSON = "UPDATE_RAW_JSON";
+    final static String UPDATE_QUERY_STRING = "UPDATE_QUERY_STRING";
 
     private String TAG = DDGQuery.class.getSimpleName();
     private DDGQueryObserver observer;
@@ -64,7 +63,7 @@ class DDGQuery {
                 if (observer != null) observer.updateQueryString(queryString);
                 Log.i(TAG, "Sending broadcast");
                 broadcastManager.sendBroadcast(new Intent(MainActivity.JSON_RESULT_INTENT)
-                        .putExtra(updateQueryString, queryString));
+                        .putExtra(UPDATE_QUERY_STRING, queryString));
                 new AsyncQuery(context).execute(queryString);
             }
         } catch (Exception e) {
@@ -118,14 +117,14 @@ class DDGQuery {
             try {
                 Log.i(TAG, "DDG REST API json" + result);
                 if (observer != null) observer.updateRawJson(result);
-                broadcastIntent.putExtra(DDGQuery.updateRawJson, result);
+                broadcastIntent.putExtra(DDGQuery.UPDATE_RAW_JSON, result);
                 JSONObject queryJSON = new JSONObject(result);
                 String strDefinition = (String) queryJSON.get("Definition");
                 String strDefinitionURL = (String) queryJSON.get("DefinitionURL");
                 if (observer != null) observer.updateDefinition(strDefinition);
-                broadcastIntent.putExtra(DDGQuery.updateDefinition, strDefinition);
+                broadcastIntent.putExtra(DDGQuery.UPDATE_DEFINITION, strDefinition);
                 if (observer != null) observer.updateDefinitionURL(strDefinitionURL);
-                broadcastIntent.putExtra(DDGQuery.updateDefinitionURL, strDefinitionURL);
+                broadcastIntent.putExtra(DDGQuery.UPDATE_DEFINITION_URL, strDefinitionURL);
             } catch (JSONException e) {
                 Log.e(TAG, "Unable to parse json / update definitions", e);
             } finally {

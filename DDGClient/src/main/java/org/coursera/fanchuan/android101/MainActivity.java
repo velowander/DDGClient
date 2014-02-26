@@ -1,13 +1,18 @@
 package org.coursera.fanchuan.android101;
 
 import android.app.Dialog;
+import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.AsyncTaskLoader;
+import android.support.v4.content.Loader;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.ActionBarActivity;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -16,8 +21,18 @@ import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+
 @SuppressWarnings("deprecation")
-public class MainActivity extends ActionBarActivity implements DDGQueryObserver {
+public class MainActivity extends ActionBarActivity implements DDGQueryObserver, LoaderManager.LoaderCallbacks {
+
+    private final String TAG = MainActivity.class.getSimpleName();
+    private byte queryLoaderId = 0;
+    private ProgressDialog dialog;
 
     private LocalBroadcastManager broadcastManager;
     public final static String JSON_RESULT_INTENT = "org.coursera.fanchuan.android101.jsonresult";
@@ -92,7 +107,54 @@ public class MainActivity extends ActionBarActivity implements DDGQueryObserver 
         //Get the word to search (send to DDGAsyncQuery)
         final EditText editSearch = (EditText) findViewById(R.id.editTextSearchWord);
         final String searchWord = editSearch.getText().toString();
-        new DDGAsyncQuery(this).execute(searchWord);
+        //new DDGAsyncQuery(this).execute(searchWord);
+        //TODO this dialog creating code not needed if DDGLoader doesn't work.
+        broadcastManager = LocalBroadcastManager.getInstance(this);
+        this.dialog = new ProgressDialog(this);
+        this.dialog.setCancelable(true);
+        this.dialog.setIndeterminate(true);
+        this.dialog.setTitle(getText(R.string.queryStartedDialogTitle));
+        this.dialog.setMessage(getText(R.string.queryStartedDialogText));
+        this.dialog.show();
+
+        //Create the actual loader that will perform the query submission to remote server
+        Bundle args = new Bundle(1);
+        args.putString(DDGLoader.KEY_SEARCH_WORD, searchWord);
+        /* Quirk in support library implementation of AsyncTaskLoader which baffled me before
+        * requires this .forceLoad() method to actually start the loader. This should not be
+        * necessary if using the API11+ framework implementation
+        * See http://stackoverflow.com/questions/10524667/android-asynctaskloader-doesnt-start-loadinbackground*/
+        getSupportLoaderManager().initLoader(queryLoaderId, args, this).forceLoad();
+    }
+
+    //methods from LoaderManager.LoaderCallbacks
+    public void onLoadFinished(Loader loader, Object data) {
+        if (dialog != null & dialog.isShowing()) {
+            dialog.dismiss();
+        }
+        Intent broadcastIntent = new Intent(MainActivity.JSON_RESULT_INTENT);
+        String result = (String) data;
+        try {
+            Log.i(TAG, "DDG REST API json" + result);
+            //TODO obviously MainActivity doesn't need to broadcast to itself here, take this out.
+            broadcastIntent.putExtra(DDGAsyncQuery.updateRawJson, result);
+            JSONObject queryJSON = new JSONObject(result);
+            String strDefinition = (String) queryJSON.get("Definition");
+            String strDefinitionURL = (String) queryJSON.get("DefinitionURL");
+            broadcastIntent.putExtra(DDGAsyncQuery.updateDefinition, strDefinition);
+            broadcastIntent.putExtra(DDGAsyncQuery.updateDefinitionURL, strDefinitionURL);
+        } catch (JSONException e) {
+            Log.e(TAG, "Unable to parse json / update definitions", e);
+        }
+        if (broadcastManager != null) broadcastManager.sendBroadcast(broadcastIntent);
+    }
+
+    public Loader onCreateLoader(int id, Bundle args) {
+        return new DDGLoader(this, args);
+    }
+
+    public void onLoaderReset(Loader loader) {
+        //not used
     }
 
     //methods from @Deprecated DDGQueryObserver interface, however they are in active use:
@@ -121,6 +183,61 @@ public class MainActivity extends ActionBarActivity implements DDGQueryObserver 
         if (queryString != null) {
             TextView textView = (TextView) findViewById(R.id.textViewQuery);
             textView.setText(queryString);
+        }
+    }
+
+    static class DDGLoader extends AsyncTaskLoader<String> {
+    /* Replacement class for DDGQuery that avoids needing a "wrapper" around the AsyncTask
+    * DDGAsyncQuery no longer supports the @Deprecated DDGObserver interface */
+
+        private final String TAG = DDGAsyncQuery.class.getSimpleName();
+        private Context context;
+        private String searchWord;
+
+        final static String KEY_SEARCH_WORD = "keySearchWord"; //
+
+        //Key strings for Intent containing query data
+        final static String UPDATE_QUERY_STRING = "UPDATE_QUERY_STRING";
+
+        public DDGLoader(Context context, Bundle args) {
+        /* Supplying a non-null Context is strongly recommended
+        * If context is null, this class can't report the results to the UI (to the Log only)!! */
+            super(context);
+            this.context = context;
+            this.searchWord = args.getString(KEY_SEARCH_WORD);
+        }
+
+        @Override
+        public String loadInBackground() {
+        /* Runs on worker thread; onPostExecute runs on UI thread
+        * params[0] should be searchWord, no other indexes defined */
+            final String encodingType = "UTF-8";
+            final String queryTemplate = "http://api.duckduckgo.com/?q=define+%s&format=json&t=%s&pretty=1";
+            Log.d(TAG, "starting AsyncQuery.doInBackground()");
+            if (searchWord == null) searchWord = "";
+            try {
+                searchWord = URLEncoder.encode(searchWord, encodingType);
+                String appName = URLEncoder.encode(TAG, encodingType);
+                String queryString = String.format(queryTemplate, searchWord, appName);
+                Log.i(TAG, "Sending broadcast");
+                LocalBroadcastManager.getInstance(context).sendBroadcast(new Intent(MainActivity.JSON_RESULT_INTENT)
+                        .putExtra(UPDATE_QUERY_STRING, queryString));
+                return HttpGetHelper.execute(queryString);
+            } catch (UnsupportedEncodingException e) {
+                Log.e(TAG, "doInBackground(): problem encoding URL");
+            } catch (NullPointerException e) {
+                Log.e(TAG, "doInBackground(): NullPointer");
+            }
+            return null;
+        }
+
+        @Override
+        protected void onStartLoading() {
+            super.onStartLoading();
+            /* Quirk in support library implementation of AsyncTaskLoader requires the forceLoad() to
+            * actually start the loader. Should be unnecessary in API11+ framework implementation.
+            * See http://stackoverflow.com/questions/10524667/android-asynctaskloader-doesnt-start-loadinbackground*/
+            forceLoad();
         }
     }
 }
