@@ -39,10 +39,10 @@ public class MainActivity extends ActionBarActivity implements DDGQueryObserver,
     public final BroadcastReceiver queryReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            updateDefinition(intent.getStringExtra(DDGAsyncQuery.UPDATE_DEFINITION));
-            updateDefinitionURL(intent.getStringExtra(DDGAsyncQuery.UPDATE_DEFINITION_URL));
-            updateRawJson(intent.getStringExtra(DDGAsyncQuery.UPDATE_RAW_JSON));
-            updateQueryString(intent.getStringExtra(DDGAsyncQuery.UPDATE_QUERY_STRING));
+            updateDefinition(intent.getStringExtra(DDGLoader.UPDATE_DEFINITION));
+            updateDefinitionURL(intent.getStringExtra(DDGLoader.UPDATE_DEFINITION_URL));
+            updateRawJson(intent.getStringExtra(DDGLoader.UPDATE_RAW_JSON));
+            updateQueryString(intent.getStringExtra(DDGLoader.UPDATE_QUERY_STRING));
         }
     };
 
