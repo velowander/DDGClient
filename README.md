@@ -2,6 +2,7 @@ DDGClient
 =========
 
 Android Studio 0.46 starter project:
+Runs on API 7 (Android 2.1 Eclair) or higher
 Look up the dictionary definition of any English word.
 Using REST API via HTTP GET request, sending to Duckduckgo public API
 Asynchronous network access using AsyncTaskLoader (previous @Deprecated implementation using AsyncTask and AsyncTask with wrapper still present in code for reference)
