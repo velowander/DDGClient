@@ -25,10 +25,10 @@ class DDGAsyncQuery extends AsyncTask<String, Void, String> {
     private ProgressDialog dialog;
 
     //Key strings for Intent containing query data
-    final static String updateDefinition = "UPDATE_DEFINITION";
-    final static String updateDefinitionURL = "UPDATE_DEFINITION_URL";
-    final static String updateRawJson = "UPDATE_RAW_JSON";
-    final static String updateQueryString = "UPDATE_QUERY_STRING";
+    final static String UPDATE_DEFINITION = "UPDATE_DEFINITION";
+    final static String UPDATE_DEFINITION_URL = "UPDATE_DEFINITION_URL";
+    final static String UPDATE_RAW_JSON = "UPDATE_RAW_JSON";
+    final static String UPDATE_QUERY_STRING = "UPDATE_QUERY_STRING";
 
     public DDGAsyncQuery(final Context context) {
         /* Supplying a non-null Context is strongly recommended
@@ -66,7 +66,7 @@ class DDGAsyncQuery extends AsyncTask<String, Void, String> {
             Log.i(TAG, "Sending broadcast");
             if (broadcastManager != null)
                 broadcastManager.sendBroadcast(new Intent(MainActivity.JSON_RESULT_INTENT)
-                        .putExtra(updateQueryString, queryString));
+                        .putExtra(UPDATE_QUERY_STRING, queryString));
             return HttpGetHelper.execute(queryString);
         } catch (UnsupportedEncodingException e) {
             Log.e(TAG, "doInBackground(): problem encoding URL");
@@ -85,12 +85,12 @@ class DDGAsyncQuery extends AsyncTask<String, Void, String> {
         Intent broadcastIntent = new Intent(MainActivity.JSON_RESULT_INTENT);
         try {
             Log.i(TAG, "DDG REST API json" + result);
-            broadcastIntent.putExtra(DDGAsyncQuery.updateRawJson, result);
+            broadcastIntent.putExtra(DDGAsyncQuery.UPDATE_RAW_JSON, result);
             JSONObject queryJSON = new JSONObject(result);
             String strDefinition = (String) queryJSON.get("Definition");
             String strDefinitionURL = (String) queryJSON.get("DefinitionURL");
-            broadcastIntent.putExtra(DDGAsyncQuery.updateDefinition, strDefinition);
-            broadcastIntent.putExtra(DDGAsyncQuery.updateDefinitionURL, strDefinitionURL);
+            broadcastIntent.putExtra(DDGAsyncQuery.UPDATE_DEFINITION, strDefinition);
+            broadcastIntent.putExtra(DDGAsyncQuery.UPDATE_DEFINITION_URL, strDefinitionURL);
         } catch (JSONException e) {
             Log.e(TAG, "Unable to parse json / update definitions", e);
         }

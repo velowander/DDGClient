@@ -9,8 +9,7 @@
         android:theme="@style/AppTheme">
         <activity
             android:name=".MainActivity"
-            android:label="Define a word"
-            android:screenOrientation="locked">
+            android:label="Define a word">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

@@ -39,10 +39,10 @@ public class MainActivity extends ActionBarActivity implements DDGQueryObserver,
     public final BroadcastReceiver queryReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            updateDefinition(intent.getStringExtra(DDGAsyncQuery.updateDefinition));
-            updateDefinitionURL(intent.getStringExtra(DDGAsyncQuery.updateDefinitionURL));
-            updateRawJson(intent.getStringExtra(DDGAsyncQuery.updateRawJson));
-            updateQueryString(intent.getStringExtra(DDGAsyncQuery.updateQueryString));
+            updateDefinition(intent.getStringExtra(DDGAsyncQuery.UPDATE_DEFINITION));
+            updateDefinitionURL(intent.getStringExtra(DDGAsyncQuery.UPDATE_DEFINITION_URL));
+            updateRawJson(intent.getStringExtra(DDGAsyncQuery.UPDATE_RAW_JSON));
+            updateQueryString(intent.getStringExtra(DDGAsyncQuery.UPDATE_QUERY_STRING));
         }
     };
 
@@ -108,23 +108,29 @@ public class MainActivity extends ActionBarActivity implements DDGQueryObserver,
         final EditText editSearch = (EditText) findViewById(R.id.editTextSearchWord);
         final String searchWord = editSearch.getText().toString();
         //new DDGAsyncQuery(this).execute(searchWord);
-        //TODO this dialog creating code not needed if DDGLoader doesn't work.
-        broadcastManager = LocalBroadcastManager.getInstance(this);
-        this.dialog = new ProgressDialog(this);
-        this.dialog.setCancelable(true);
-        this.dialog.setIndeterminate(true);
-        this.dialog.setTitle(getText(R.string.queryStartedDialogTitle));
-        this.dialog.setMessage(getText(R.string.queryStartedDialogText));
-        this.dialog.show();
+        //DDGLoader implementation does not have a
+        try {
+            this.dialog = new ProgressDialog(this);
+            this.dialog.setCancelable(true);
+            this.dialog.setIndeterminate(true);
+            this.dialog.setTitle(getText(R.string.queryStartedDialogTitle));
+            this.dialog.setMessage(getText(R.string.queryStartedDialogText));
+            this.dialog.show();
+        } catch (Exception e) {
+            Log.w(TAG, "startQuery(): unable to show dialog");
+        }
 
         //Create the actual loader that will perform the query submission to remote server
         Bundle args = new Bundle(1);
         args.putString(DDGLoader.KEY_SEARCH_WORD, searchWord);
         /* Quirk in support library implementation of AsyncTaskLoader which baffled me before
         * requires this .forceLoad() method to actually start the loader. This should not be
-        * necessary if using the API11+ framework implementation
-        * See http://stackoverflow.com/questions/10524667/android-asynctaskloader-doesnt-start-loadinbackground*/
-        getSupportLoaderManager().initLoader(queryLoaderId, args, this).forceLoad();
+        * necessary if using the API11+ framework implementation but I haven't tried it.
+        * See http://stackoverflow.com/questions/10524667/android-asynctaskloader-doesnt-start-loadinbackground
+        * Also, I found for this application .restartLoader makes sure it fetches new data for every
+        * query; with .initLoader on subsequent queries it would return data from the previous query
+        * seemingly without even accessing the network */
+        getSupportLoaderManager().restartLoader(queryLoaderId, args, this).forceLoad();
     }
 
     //methods from LoaderManager.LoaderCallbacks
@@ -136,13 +142,13 @@ public class MainActivity extends ActionBarActivity implements DDGQueryObserver,
         String result = (String) data;
         try {
             Log.i(TAG, "DDG REST API json" + result);
-            //TODO obviously MainActivity doesn't need to broadcast to itself here, take this out.
-            broadcastIntent.putExtra(DDGAsyncQuery.updateRawJson, result);
+            //Here MainActivity is broadcasting to itself, an artifact of when this code was in another class.
+            broadcastIntent.putExtra(DDGLoader.UPDATE_RAW_JSON, result);
             JSONObject queryJSON = new JSONObject(result);
             String strDefinition = (String) queryJSON.get("Definition");
             String strDefinitionURL = (String) queryJSON.get("DefinitionURL");
-            broadcastIntent.putExtra(DDGAsyncQuery.updateDefinition, strDefinition);
-            broadcastIntent.putExtra(DDGAsyncQuery.updateDefinitionURL, strDefinitionURL);
+            broadcastIntent.putExtra(DDGLoader.UPDATE_DEFINITION, strDefinition);
+            broadcastIntent.putExtra(DDGLoader.UPDATE_DEFINITION_URL, strDefinitionURL);
         } catch (JSONException e) {
             Log.e(TAG, "Unable to parse json / update definitions", e);
         }
@@ -198,6 +204,9 @@ public class MainActivity extends ActionBarActivity implements DDGQueryObserver,
 
         //Key strings for Intent containing query data
         final static String UPDATE_QUERY_STRING = "UPDATE_QUERY_STRING";
+        final static String UPDATE_DEFINITION = "UPDATE_DEFINITION";
+        final static String UPDATE_DEFINITION_URL = "UPDATE_DEFINITION_URL";
+        final static String UPDATE_RAW_JSON = "UPDATE_RAW_JSON";
 
         public DDGLoader(Context context, Bundle args) {
         /* Supplying a non-null Context is strongly recommended
@@ -229,15 +238,6 @@ public class MainActivity extends ActionBarActivity implements DDGQueryObserver,
                 Log.e(TAG, "doInBackground(): NullPointer");
             }
             return null;
-        }
-
-        @Override
-        protected void onStartLoading() {
-            super.onStartLoading();
-            /* Quirk in support library implementation of AsyncTaskLoader requires the forceLoad() to
-            * actually start the loader. Should be unnecessary in API11+ framework implementation.
-            * See http://stackoverflow.com/questions/10524667/android-asynctaskloader-doesnt-start-loadinbackground*/
-            forceLoad();
         }
     }
 }
