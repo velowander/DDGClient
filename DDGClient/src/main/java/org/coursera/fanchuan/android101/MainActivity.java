@@ -1,6 +1,6 @@
 package org.coursera.fanchuan.android101;
 
-import android.app.Dialog;
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -90,9 +90,11 @@ public class MainActivity extends ActionBarActivity implements DDGQueryObserver,
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
         if (id == R.id.help_action) {
-            Dialog help = new Dialog(this);
-            help.setContentView(R.layout.dialog_help);
-            help.show();
+            final AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setTitle(R.string.help_title);
+            builder.setMessage(R.string.help_text);
+            builder.setPositiveButton(android.R.string.ok, null);
+            builder.show();
             return true;
         }
         return super.onOptionsItemSelected(item);
