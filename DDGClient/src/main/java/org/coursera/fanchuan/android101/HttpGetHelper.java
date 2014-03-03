@@ -14,12 +14,14 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
+@Deprecated
 class HttpGetHelper {
     /* Helper class to submit an HTTPGet request to a server, useful for REST API work
     * Constructor: no argument only but no need to instantiate as it has only static methods
      */
     final static String TAG = HttpGetHelper.class.getSimpleName();
 
+    @Deprecated
     static String execute(String Url) {
         /*
         Url: the entire URL for the search, with http://

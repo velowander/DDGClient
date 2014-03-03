@@ -6,6 +6,8 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.net.http.AndroidHttpClient;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.AsyncTaskLoader;
@@ -21,6 +23,9 @@ import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import org.apache.http.client.ResponseHandler;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.BasicResponseHandler;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -219,25 +224,38 @@ public class MainActivity extends ActionBarActivity implements DDGQueryObserver,
         }
 
         @Override
+        @SuppressWarnings("deprecation")
         public String loadInBackground() {
         /* Runs on worker thread; onPostExecute runs on UI thread
         * params[0] should be searchWord, no other indexes defined */
             final String encodingType = "UTF-8";
-            final String queryTemplate = "http://api.duckduckgo.com/?q=define+%s&format=json&t=%s&pretty=1";
+            final String UrlTemplate = "http://api.duckduckgo.com/?q=define+%s&format=json&t=%s&pretty=1";
+
             Log.d(TAG, "starting AsyncQuery.doInBackground()");
             if (searchWord == null) searchWord = "";
             try {
                 searchWord = URLEncoder.encode(searchWord, encodingType);
                 String appName = URLEncoder.encode(TAG, encodingType);
-                String queryString = String.format(queryTemplate, searchWord, appName);
+                String UrlString = String.format(UrlTemplate, searchWord, appName);
                 Log.i(TAG, "Sending broadcast");
                 LocalBroadcastManager.getInstance(context).sendBroadcast(new Intent(MainActivity.JSON_RESULT_INTENT)
-                        .putExtra(UPDATE_QUERY_STRING, queryString));
-                return HttpGetHelper.execute(queryString);
+                        .putExtra(UPDATE_QUERY_STRING, UrlString));
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.FROYO) {
+                    AndroidHttpClient httpClient = AndroidHttpClient.newInstance(""); //No UserAgent
+                    HttpGet getRequest = new HttpGet(UrlString);
+                    ResponseHandler<String> responseHandler = new BasicResponseHandler();
+                    try {
+                        return httpClient.execute(getRequest, responseHandler);
+                    } finally {
+                        httpClient.close();
+                    }
+                } else return HttpGetHelper.execute(UrlString);
             } catch (UnsupportedEncodingException e) {
                 Log.e(TAG, "doInBackground(): problem encoding URL");
             } catch (NullPointerException e) {
                 Log.e(TAG, "doInBackground(): NullPointer");
+            } catch (Exception e) {
+                Log.e(TAG, "doInBackground(): Exception loading from remote server", e);
             }
             return null;
         }
