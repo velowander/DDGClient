@@ -113,7 +113,7 @@ public class MainActivity extends ActionBarActivity implements DDGQueryObserver,
     protected void startQuery() {
         //Get the word to search (send to DDGAsyncQuery)
         final EditText editSearch = (EditText) findViewById(R.id.editTextSearchWord);
-        final String searchWord = editSearch.getText().toString();
+        final String searchWord = editSearch.getText().toString(); //EditText.getText() returns Editable
         //new DDGAsyncQuery(this).execute(searchWord);
         //DDGLoader implementation does not have a
         try {
