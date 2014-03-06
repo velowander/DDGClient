@@ -29,7 +29,7 @@ class DDGQuery {
     final static String UPDATE_QUERY_STRING = "UPDATE_QUERY_STRING";
 
     private String TAG = DDGQuery.class.getSimpleName();
-    private DDGQueryObserver observer;
+    private Callback observer;
     private Context context;
     private LocalBroadcastManager broadcastManager;
 
@@ -41,7 +41,7 @@ class DDGQuery {
     }
 
     @Deprecated
-    public DDGQuery(final Context context, final DDGQueryObserver observer) {
+    public DDGQuery(final Context context, final Callback observer) {
         //Will use the (optionally) supplied ProgressDialog and close it afterwards
         this(context);
         this.observer = observer;
@@ -58,7 +58,7 @@ class DDGQuery {
             final String encodingType = "UTF-8";
             searchWord = URLEncoder.encode(searchWord, encodingType);
             CharSequence appName = URLEncoder.encode(TAG, encodingType);
-            if (!searchWord.isEmpty()) {
+            if (!searchWord.equals("")) { //String.isEmpty() min API 9
                 String queryString = String.format(queryTemplate, searchWord, appName);
                 if (observer != null) observer.updateQueryString(queryString);
                 Log.i(TAG, "Sending broadcast");
@@ -76,7 +76,7 @@ class DDGQuery {
     protected static class AsyncQuery extends AsyncTask<String, Void, String> {
 
         private final String TAG = AsyncQuery.class.getSimpleName();
-        private DDGQueryObserver observer;
+        private Callback observer;
         private Context context;
         private ProgressDialog dialog;
 
@@ -90,7 +90,7 @@ class DDGQuery {
         }
 
         @Deprecated
-        public AsyncQuery(final Context context, final DDGQueryObserver observer) {
+        public AsyncQuery(final Context context, final Callback observer) {
             this(context);
             this.observer = observer;
         }
@@ -135,19 +135,20 @@ class DDGQuery {
             LocalBroadcastManager.getInstance(context).sendBroadcast(broadcastIntent);
         }
     }
+
+    @Deprecated
+    @SuppressWarnings("unused")
+    static interface Callback {
+        /* Callback methods to give the activity information to update the UI.
+        * @Deprecated in favor of using Intents and LocalBroadcastManager but still supported by DDGQuery which
+        * is also @Deprecated. DDGAsyncQuery does not at this writing support DDGObserver. */
+        void updateDefinition(String definition);
+
+        void updateDefinitionURL(String definitionURL);
+
+        void updateRawJson(String rawJson);
+
+        void updateQueryString(String queryString);
+    }
 }
 
-@Deprecated
-@SuppressWarnings("unused")
-interface DDGQueryObserver {
-    /* Callback methods to give the activity information to update the UI.
-    * @Deprecated in favor of using Intents and LocalBroadcastManager but still supported by DDGQuery which
-    * is also @Deprecated. DDGAsyncQuery does not at this writing support DDGObserver. */
-    void updateDefinition(String definition);
-
-    void updateDefinitionURL(String definitionURL);
-
-    void updateRawJson(String rawJson);
-
-    void updateQueryString(String queryString);
-}

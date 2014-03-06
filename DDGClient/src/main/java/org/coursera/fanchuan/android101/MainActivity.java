@@ -33,7 +33,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 
 @SuppressWarnings("deprecation")
-public class MainActivity extends ActionBarActivity implements DDGQueryObserver, LoaderManager.LoaderCallbacks {
+public class MainActivity extends ActionBarActivity implements DDGQuery.Callback, LoaderManager.LoaderCallbacks {
 
     private final String TAG = MainActivity.class.getSimpleName();
     private byte queryLoaderId = 0;
@@ -77,7 +77,7 @@ public class MainActivity extends ActionBarActivity implements DDGQueryObserver,
     @Override
     protected void onResume() {
         super.onResume();
-        broadcastManager.registerReceiver(queryReceiver, new IntentFilter(this.JSON_RESULT_INTENT));
+        broadcastManager.registerReceiver(queryReceiver, new IntentFilter(MainActivity.JSON_RESULT_INTENT));
     }
 
     @Override
@@ -111,7 +111,7 @@ public class MainActivity extends ActionBarActivity implements DDGQueryObserver,
     }
 
     protected void startQuery() {
-        //Get the word to search (send to DDGAsyncQuery)
+        //Get the word to search and form into a complete URL (REST API)
         final EditText editSearch = (EditText) findViewById(R.id.editTextSearchWord);
         final String searchWord = editSearch.getText().toString(); //EditText.getText() returns Editable
         //new DDGAsyncQuery(this).execute(searchWord);
@@ -170,7 +170,7 @@ public class MainActivity extends ActionBarActivity implements DDGQueryObserver,
         //not used
     }
 
-    //methods from @Deprecated DDGQueryObserver interface, however they are in active use:
+    //methods from @Deprecated Callback interface, however they are in active use:
     public void updateDefinition(String definition) {
         if (definition != null) {
             TextView textView = (TextView) findViewById(R.id.textViewDefinition);
