@@ -1,7 +1,5 @@
-DDGClient
-=========
-
-Android Studio 0.46 starter project:
+##DDGClient
+Android Studio learning project from Coursera course
 Runs on API 7 (Android 2.1 Eclair) or higher
 Look up the dictionary definition of any English word.
 Using REST API via HTTP GET request, sending to Duckduckgo public API
