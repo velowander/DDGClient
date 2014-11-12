@@ -1,4 +1,7 @@
 ##DDGClient
+
+_ It appears that Duckduckgo has shutdown or altered their API, so the application no longer works. _
+
 * Android Studio learning project from Coursera course
 * Runs on API 7 (Android 2.1 Eclair) or higher
 * Look up the dictionary definition of any English word.
