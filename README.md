@@ -1,6 +1,5 @@
-##DDGClient
-
-# Duckduckgo has shutdown or altered their API, so the application no longer works. #
+# Duckduckgo has shutdown their full public API, so the application no longer works.
+## However, it does showcase how to write an application that uses broadcast messages, communicates with a REST API, accesses the network on a background thread, and parses the JSON response send by a server.
 
 * Android Studio learning project from Coursera course
 * Runs on API 7 (Android 2.1 Eclair) or higher
